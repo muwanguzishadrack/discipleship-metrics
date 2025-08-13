@@ -57,24 +57,22 @@ export function Settings() {
 
           <div className="p-6">
             <TabsContent value="general" className="space-y-6 mt-0">
-              <Card>
-                <CardHeader>
-                  <CardTitle>General Settings</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="text-sm text-gray-600">
-                      <p className="font-medium mb-2">Application Preferences</p>
-                      <p>Configure general application settings and preferences.</p>
-                      <div className="mt-4 p-4 bg-gray-50 rounded-lg">
-                        <p className="text-sm text-gray-500">
-                          More general settings will be added here in future updates.
-                        </p>
-                      </div>
+              <div className="space-y-4">
+                <div>
+                  <h2 className="text-lg font-semibold">General Settings</h2>
+                </div>
+                <div className="space-y-4">
+                  <div className="text-sm text-gray-600">
+                    <p className="font-medium mb-2">Application Preferences</p>
+                    <p>Configure general application settings and preferences.</p>
+                    <div className="mt-4 p-4 bg-gray-50 rounded-lg border">
+                      <p className="text-sm text-gray-500">
+                        More general settings will be added here in future updates.
+                      </p>
                     </div>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             </TabsContent>
 
             <TabsContent value="locations" className="space-y-6 mt-0">
@@ -82,37 +80,33 @@ export function Settings() {
             </TabsContent>
 
             <TabsContent value="users" className="space-y-6 mt-0">
-              <Card>
-                <CardHeader>
-                  <CardTitle>User Management</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-center py-8">
-                    <Users className="mx-auto h-12 w-12 text-gray-400" />
-                    <h3 className="mt-2 text-sm font-medium text-gray-900">Coming Soon</h3>
-                    <p className="mt-1 text-sm text-gray-500">
-                      User management features will be available in a future update.
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
+              <div className="space-y-4">
+                <div>
+                  <h2 className="text-lg font-semibold">User Management</h2>
+                </div>
+                <div className="text-center py-8 bg-gray-50 rounded-lg border">
+                  <Users className="mx-auto h-12 w-12 text-gray-400" />
+                  <h3 className="mt-2 text-sm font-medium text-gray-900">Coming Soon</h3>
+                  <p className="mt-1 text-sm text-gray-500">
+                    User management features will be available in a future update.
+                  </p>
+                </div>
+              </div>
             </TabsContent>
 
             <TabsContent value="data" className="space-y-6 mt-0">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Data Management</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-center py-8">
-                    <Database className="mx-auto h-12 w-12 text-gray-400" />
-                    <h3 className="mt-2 text-sm font-medium text-gray-900">Coming Soon</h3>
-                    <p className="mt-1 text-sm text-gray-500">
-                      Data import/export features will be available in a future update.
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
+              <div className="space-y-4">
+                <div>
+                  <h2 className="text-lg font-semibold">Data Management</h2>
+                </div>
+                <div className="text-center py-8 bg-gray-50 rounded-lg border">
+                  <Database className="mx-auto h-12 w-12 text-gray-400" />
+                  <h3 className="mt-2 text-sm font-medium text-gray-900">Coming Soon</h3>
+                  <p className="mt-1 text-sm text-gray-500">
+                    Data import/export features will be available in a future update.
+                  </p>
+                </div>
+              </div>
             </TabsContent>
           </div>
         </Tabs>

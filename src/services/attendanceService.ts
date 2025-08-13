@@ -21,6 +21,36 @@ export interface DashboardMetrics {
 }
 
 export class AttendanceService {
+  // New method for fetching all attendance reports without pagination (for client-side operations)
+  static async getAllAttendanceReports(filters: Omit<AttendanceFilters, 'page' | 'pageSize'> = {}) {
+    let query = supabase
+      .from('attendance_reports')
+      .select(`
+        *,
+        location:locations(id, name, address)
+      `)
+      .order('total_attendance', { ascending: false })
+
+    // Apply date filtering
+    if (filters.dateFilter && filters.dateFilter !== 'all') {
+      const dateRange = this.getDateRange(filters.dateFilter, filters.customDateRange)
+      if (dateRange) {
+        query = query.gte('date', dateRange.from).lte('date', dateRange.to)
+      }
+    }
+
+    // Apply tier filtering
+    if (filters.tierFilter && filters.tierFilter !== 'all') {
+      query = query.eq('tier', filters.tierFilter)
+    }
+
+    const { data, error } = await query
+
+    if (error) throw error
+
+    return { data: data || [] }
+  }
+
   static async getAttendanceReports(filters: AttendanceFilters = {}) {
     let query = supabase
       .from('attendance_reports')

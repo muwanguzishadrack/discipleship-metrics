@@ -27,9 +27,30 @@ export default function App() {
           }>
             <Route index element={<Navigate to="/dashboard" replace />} />
             <Route path="dashboard" element={<Dashboard />} />
-            <Route path="attendance" element={<div className="p-6"><h1 className="text-3xl font-bold text-white">Physical Garage Attendance</h1><p className="text-gray-300 mt-2">Coming Soon</p></div>} />
-            <Route path="analytics" element={<div className="p-6"><h1 className="text-3xl font-bold text-white">Analytics</h1><p className="text-gray-300 mt-2">Coming Soon</p></div>} />
-            <Route path="reports" element={<div className="p-6"><h1 className="text-3xl font-bold text-white">Reports</h1><p className="text-gray-300 mt-2">Coming Soon</p></div>} />
+            <Route path="attendance" element={
+              <div className="space-y-6">
+                <div>
+                  <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">Physical Garage Attendance</h1>
+                  <p className="text-gray-300 text-sm sm:text-base mt-2">Coming Soon</p>
+                </div>
+              </div>
+            } />
+            <Route path="analytics" element={
+              <div className="space-y-6">
+                <div>
+                  <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">Analytics</h1>
+                  <p className="text-gray-300 text-sm sm:text-base mt-2">Coming Soon</p>
+                </div>
+              </div>
+            } />
+            <Route path="reports" element={
+              <div className="space-y-6">
+                <div>
+                  <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">Reports</h1>
+                  <p className="text-gray-300 text-sm sm:text-base mt-2">Coming Soon</p>
+                </div>
+              </div>
+            } />
             <Route path="settings" element={<Settings />} />
           </Route>
         </Routes>

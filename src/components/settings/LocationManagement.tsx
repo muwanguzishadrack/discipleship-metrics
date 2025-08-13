@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useLocations, useCreateLocation, useUpdateLocation, useDeleteLocation } from "@/hooks/useLocations";
 import { LocationInsert, LocationUpdate } from "@/types/database";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -34,7 +41,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Edit, Trash2, MapPin, Search } from "lucide-react";
+import { Plus, Edit, Trash2, MapPin, Search, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
 
 interface LocationFormData {
   name: string;
@@ -54,18 +61,53 @@ const emptyLocationForm: LocationFormData = {
 
 export function LocationManagement() {
   const [searchQuery, setSearchQuery] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [rowsPerPage, setRowsPerPage] = useState("5");
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState<string | null>(null);
   const [locationForm, setLocationForm] = useState<LocationFormData>(emptyLocationForm);
 
   // Queries and mutations
-  const { data: locations, isLoading, error } = useLocations({ 
+  const { data: allLocations, isLoading, error } = useLocations({ 
     search: searchQuery.length >= 2 ? searchQuery : undefined 
   });
   const createLocationMutation = useCreateLocation();
   const updateLocationMutation = useUpdateLocation();
   const deleteLocationMutation = useDeleteLocation();
+
+  // Client-side pagination
+  const paginatedData = useMemo(() => {
+    const locations = allLocations || [];
+    const pageSize = parseInt(rowsPerPage);
+    const startIndex = (currentPage - 1) * pageSize;
+    const endIndex = startIndex + pageSize;
+    
+    return {
+      locations: locations.slice(startIndex, endIndex),
+      totalCount: locations.length,
+      totalPages: Math.ceil(locations.length / pageSize),
+      startIndex,
+      endIndex: Math.min(endIndex, locations.length),
+    };
+  }, [allLocations, currentPage, rowsPerPage]);
+
+  const { locations, totalCount, totalPages, startIndex, endIndex } = paginatedData;
+
+  // Pagination handlers
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
+  const handleRowsPerPageChange = (value: string) => {
+    setRowsPerPage(value);
+    setCurrentPage(1);
+  };
+
+  const handleSearchChange = (value: string) => {
+    setSearchQuery(value);
+    setCurrentPage(1); // Reset to first page when searching
+  };
 
   const handleInputChange = (field: keyof LocationFormData, value: string | number | boolean) => {
     setLocationForm(prev => ({
@@ -141,18 +183,18 @@ export function LocationManagement() {
 
   return (
     <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-              <CardTitle className="flex items-center gap-2">
-                <MapPin className="h-5 w-5" />
-                Location Management
-              </CardTitle>
-              <p className="text-sm text-gray-600 mt-1">
-                Manage physical locations for attendance tracking
-              </p>
-            </div>
+      <div className="space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h2 className="text-lg font-semibold flex items-center gap-2">
+              <MapPin className="h-5 w-5" />
+              Location Management
+            </h2>
+            <p className="text-sm text-gray-600 mt-1">
+              Manage physical locations for attendance tracking
+            </p>
+          </div>
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
             <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
               <DialogTrigger asChild>
                 <Button className="gap-2">
@@ -233,16 +275,16 @@ export function LocationManagement() {
               </DialogContent>
             </Dialog>
           </div>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
+        </div>
+        
+        <div className="space-y-4">
             {/* Search */}
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
               <Input
                 placeholder="Search locations..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => handleSearchChange(e.target.value)}
                 className="pl-10"
               />
             </div>
@@ -269,7 +311,6 @@ export function LocationManagement() {
                       <TableHead>Name</TableHead>
                       <TableHead>Address</TableHead>
                       <TableHead className="text-center">Capacity</TableHead>
-                      <TableHead className="text-center">Usage</TableHead>
                       <TableHead className="text-center">Status</TableHead>
                       <TableHead className="text-center">Actions</TableHead>
                     </TableRow>
@@ -277,7 +318,7 @@ export function LocationManagement() {
                   <TableBody>
                     {locations && locations.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={6} className="text-center py-8 text-gray-500">
+                        <TableCell colSpan={5} className="text-center py-8 text-gray-500">
                           {searchQuery ? "No locations found matching your search." : "No locations found. Add your first location to get started!"}
                         </TableCell>
                       </TableRow>
@@ -287,11 +328,6 @@ export function LocationManagement() {
                           <TableCell className="font-medium">{location.name}</TableCell>
                           <TableCell className="text-gray-600">{location.address || "—"}</TableCell>
                           <TableCell className="text-center">{location.capacity || "—"}</TableCell>
-                          <TableCell className="text-center">
-                            <Badge variant="secondary">
-                              {location.usage_count || 0} reports
-                            </Badge>
-                          </TableCell>
                           <TableCell className="text-center">
                             <Badge variant={location.is_active ? "default" : "secondary"}>
                               {location.is_active ? "Active" : "Inactive"}
@@ -322,16 +358,9 @@ export function LocationManagement() {
                                     <AlertDialogTitle>Delete Location</AlertDialogTitle>
                                     <AlertDialogDescription>
                                       Are you sure you want to delete "{location.name}"?
-                                      {location.usage_count && location.usage_count > 0 ? (
-                                        <span className="block mt-2 text-red-600 font-medium">
-                                          Warning: This location has {location.usage_count} attendance reports. 
-                                          These reports will be unlinked from this location. This action cannot be undone.
-                                        </span>
-                                      ) : (
-                                        <span className="block mt-2 text-red-600 font-medium">
-                                          This action cannot be undone.
-                                        </span>
-                                      )}
+                                      <span className="block mt-2 text-red-600 font-medium">
+                                        This action cannot be undone.
+                                      </span>
                                     </AlertDialogDescription>
                                   </AlertDialogHeader>
                                   <AlertDialogFooter>
@@ -354,9 +383,76 @@ export function LocationManagement() {
                 </Table>
               </div>
             )}
-          </div>
-        </CardContent>
-      </Card>
+
+            {/* Pagination Controls */}
+            {!isLoading && locations && locations.length > 0 && (
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mt-4">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-gray-600">Rows per page:</span>
+                  <Select value={rowsPerPage} onValueChange={handleRowsPerPageChange}>
+                    <SelectTrigger className="w-16 h-8 focus:ring-0 focus:ring-offset-0">
+                      <SelectValue className="text-gray-600" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="5">5</SelectItem>
+                      <SelectItem value="10">10</SelectItem>
+                      <SelectItem value="15">15</SelectItem>
+                      <SelectItem value="25">25</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+                  <div className="text-sm text-gray-600 text-center sm:text-left">
+                    Showing {startIndex + 1}-{endIndex} of {totalCount} locations
+                  </div>
+                  
+                  <div className="flex items-center justify-center gap-1">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="hover:bg-gray-50"
+                      onClick={() => handlePageChange(1)}
+                      disabled={currentPage === 1}
+                    >
+                      <ChevronsLeft className="h-4 w-4 text-gray-600" />
+                    </Button>
+                    
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="hover:bg-gray-50"
+                      onClick={() => handlePageChange(currentPage - 1)}
+                      disabled={currentPage === 1}
+                    >
+                      <ChevronLeft className="h-4 w-4 text-gray-600" />
+                    </Button>
+                    
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="hover:bg-gray-50"
+                      onClick={() => handlePageChange(currentPage + 1)}
+                      disabled={currentPage === totalPages}
+                    >
+                      <ChevronRight className="h-4 w-4 text-gray-600" />
+                    </Button>
+                    
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="hover:bg-gray-50"
+                      onClick={() => handlePageChange(totalPages)}
+                      disabled={currentPage === totalPages}
+                    >
+                      <ChevronsRight className="h-4 w-4 text-gray-600" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
+        </div>
+      </div>
 
       {/* Edit Location Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>

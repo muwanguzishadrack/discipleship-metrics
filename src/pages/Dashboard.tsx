@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useAttendanceReports, useDashboardMetrics, useCreateAttendanceReport, useUpdateAttendanceReport } from '@/hooks/useAttendanceReports';
+import { useState, useMemo } from "react";
+import { useAllAttendanceReports, useDashboardMetrics, useCreateAttendanceReport, useUpdateAttendanceReport } from '@/hooks/useAttendanceReports';
 import { AttendanceReportInsert } from '@/types/database';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, UserCheck, Zap, MapPin, Home, Building, Baby, TrendingUp, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Edit, ListFilter, Calendar, FilePlus2 } from "lucide-react";
@@ -79,17 +79,15 @@ export function Dashboard() {
     hc2: 0
   });
 
-  // Fetch attendance reports and dashboard metrics
+  // Fetch all attendance reports (no pagination - handled client-side)
   const {
-    data: attendanceData,
+    data: allReports,
     isLoading: isLoadingReports,
     error: reportsError,
-  } = useAttendanceReports({
+  } = useAllAttendanceReports({
     dateFilter,
     customDateRange: dateFilter === 'custom-range' ? customDateRange : undefined,
     tierFilter,
-    page: currentPage,
-    pageSize: parseInt(rowsPerPage),
   });
 
   const {
@@ -103,14 +101,23 @@ export function Dashboard() {
   const createReportMutation = useCreateAttendanceReport();
   const updateReportMutation = useUpdateAttendanceReport();
 
-  // Use real data from the query
-  const filteredData = attendanceData?.reports || [];
-  const totalRows = attendanceData?.totalCount || 0;
-  const totalPages = attendanceData?.totalPages || 1;
-  
-  const startIndex = (currentPage - 1) * parseInt(rowsPerPage);
-  const endIndex = Math.min(startIndex + parseInt(rowsPerPage), totalRows);
-  const currentData = filteredData;
+  // Client-side pagination and filtering
+  const paginatedData = useMemo(() => {
+    const reports = allReports || [];
+    const pageSize = parseInt(rowsPerPage);
+    const startIndex = (currentPage - 1) * pageSize;
+    const endIndex = startIndex + pageSize;
+    
+    return {
+      reports: reports.slice(startIndex, endIndex),
+      totalCount: reports.length,
+      totalPages: Math.ceil(reports.length / pageSize),
+      startIndex,
+      endIndex: Math.min(endIndex, reports.length),
+    };
+  }, [allReports, currentPage, rowsPerPage]);
+
+  const { reports: currentData, totalCount: totalRows, totalPages, startIndex, endIndex } = paginatedData;
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -272,7 +279,7 @@ export function Dashboard() {
       return;
     }
 
-    const reportToUpdate = filteredData[selectedReportIndex];
+    const reportToUpdate = currentData[selectedReportIndex];
     if (!reportToUpdate) {
       alert('Report not found');
       return;

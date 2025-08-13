@@ -12,7 +12,7 @@ export interface LocationWithUsage extends Location {
 }
 
 export class LocationService {
-  static async getLocations(filters: LocationFilters = {}): Promise<LocationWithUsage[]> {
+  static async getLocations(filters: LocationFilters = {}): Promise<Location[]> {
     let query = supabase
       .from('locations')
       .select('*')
@@ -32,22 +32,7 @@ export class LocationService {
 
     if (error) throw error
 
-    // Get usage counts separately for each location
-    const locationsWithUsage: LocationWithUsage[] = []
-    
-    for (const location of data || []) {
-      const { data: usageData } = await supabase
-        .from('attendance_reports')
-        .select('id')
-        .eq('location_id', location.id)
-
-      locationsWithUsage.push({
-        ...location,
-        usage_count: usageData?.length || 0,
-      })
-    }
-
-    return locationsWithUsage
+    return data || []
   }
 
   static async getActiveLocations(): Promise<Location[]> {
