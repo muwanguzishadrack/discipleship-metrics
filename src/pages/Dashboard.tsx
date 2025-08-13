@@ -47,7 +47,7 @@ export function Dashboard() {
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState("5");
   const [tierFilter, setTierFilter] = useState("all");
-  const [dateFilter, setDateFilter] = useState("this-week");
+  const [dateFilter, setDateFilter] = useState("all");
   const [customDateRange, setCustomDateRange] = useState<{ from: Date | undefined; to: Date | undefined }>({ from: undefined, to: undefined });
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
   const [isDateDropdownOpen, setIsDateDropdownOpen] = useState(false);
@@ -362,6 +362,7 @@ export function Dashboard() {
       yellow: "bg-yellow-100 text-yellow-800 border-yellow-200",
       orange: "bg-orange-100 text-orange-800 border-orange-200",
       red: "bg-red-100 text-red-800 border-red-200",
+      blue: "bg-blue-100 text-blue-800 border-blue-200",
       gray: "bg-gray-100 text-gray-800 border-gray-200"
     };
     return colors[tier as keyof typeof colors] || colors.gray;
@@ -596,6 +597,7 @@ export function Dashboard() {
                     tierFilter === 'yellow' ? 'bg-yellow-500' :
                     tierFilter === 'orange' ? 'bg-orange-500' :
                     tierFilter === 'red' ? 'bg-red-500' :
+                    tierFilter === 'blue' ? 'bg-blue-500' :
                     'bg-gray-500'
                   }`}></span>
                 )}
@@ -644,6 +646,13 @@ export function Dashboard() {
               >
                 <span className="w-3 h-3 rounded-full bg-red-500"></span>
                 Red
+              </DropdownMenuItem>
+              <DropdownMenuItem 
+                onClick={() => handleTierFilterChange('blue')}
+                className={`flex items-center gap-3 ${tierFilter === 'blue' ? 'bg-gray-100' : ''}`}
+              >
+                <span className="w-3 h-3 rounded-full bg-blue-500"></span>
+                Blue
               </DropdownMenuItem>
               <DropdownMenuItem 
                 onClick={() => handleTierFilterChange('gray')}

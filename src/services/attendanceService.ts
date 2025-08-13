@@ -27,8 +27,8 @@ export class AttendanceService {
       .select(`
         *,
         location:locations(id, name, address)
-      `)
-      .order('date', { ascending: false })
+      `, { count: 'exact' })
+      .order('total_attendance', { ascending: false })
 
     // Apply date filtering
     if (filters.dateFilter && filters.dateFilter !== 'all') {
